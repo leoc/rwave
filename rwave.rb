@@ -19,31 +19,35 @@ class KeyboardHandler < EM::Connection
   def receive_line line
     line.chomp!
     case(line)
-    when /^on$/ then
-      on
-    when /^off$/ then
-      off
-    when /^dim (\d+)$/ then
-      dim $1.to_i
+    when /^add (\w+) (\d+) (\w+)$/ then
+      klass = RWave::Node.const_get("#{$1.capitalize}")
+      $nodes[$3.downcase] = klass.new($2.to_i, $rwave)
+    when /^rm (\w+)$/ then
+      $nodes.delete($1.downcase)
+    when /^(\w+) on$/ then
+      $nodes[$1.downcase].on
+    when /^(\w+) off$/ then
+      $nodes[$1.downcase].off
+    when /^(\w+) dim (\d+)$/ then
+      $nodes[$1.downcase].dim $2.to_i
+    when /^start random$/ then
+      $timer = EM.add_periodic_timer(2) do
+        level = Random.rand(99)
+        puts "Change to #{level}%"
+        dimmer.dim(level)
+        puts $rwave.send_queue.inspect
+      end
+    when /^stop random$/ then
+      $timer.cancel
     when /^exit$/ then
       EM.stop
-    else
-      puts line
-      prompt
     end
   end
 end
 
 EM.run do
   $rwave = RWave::Port.new('/dev/ttyUSB0')
+  $nodes = {}
 
-  dimmer = RWave::Node::Dimmer.new(0x02, $rwave)
-  dimmer.on
-
-  EM.add_periodic_timer(2) do
-    level = Random.rand(99)
-    puts "Change to #{level}%"
-    dimmer.dim(level)
-    puts $rwave.send_queue.inspect
-  end
+  EM.open_keyboard KeyboardHandler
 end
