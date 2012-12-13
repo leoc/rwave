@@ -30,12 +30,10 @@ class KeyboardHandler < EM::Connection
       $nodes[$1.downcase].off
     when /^(\w+) dim (\d+)$/ then
       $nodes[$1.downcase].dim $2.to_i
-    when /^start random$/ then
+    when /^start random on (\w+)$/ then
       $timer = EM.add_periodic_timer(2) do
         level = Random.rand(99)
-        puts "Change to #{level}%"
-        dimmer.dim(level)
-        puts $rwave.send_queue.inspect
+        $nodes[$1.downcase].dim(level)
       end
     when /^stop random$/ then
       $timer.cancel
