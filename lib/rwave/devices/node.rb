@@ -6,6 +6,7 @@ module RWave
       @callback_ids = []
 
       @port.on_message do |sent, received|
+        puts "call handler for 0x#{@node_id.to_s(16)}: #{received}"
         unless received.ack? or received.length <= 2
           case received.bytes[2]
           when 0x00 then on_request(sent, received)
