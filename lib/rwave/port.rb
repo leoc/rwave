@@ -52,9 +52,14 @@ module RWave
     end
 
     def receive_message message
-      puts "received message: #{message.bytes.inspect}"
+      puts "received message: #{message}"
 
-      send_ack unless message.ack?
+      # check checksum
+      if message.correct?
+        send_ack unless message.ack?
+      else
+        puts "Checksum for message is not correct!"
+      end
 
       invoke_message_callbacks @sent, message
     end
