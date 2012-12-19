@@ -19,7 +19,9 @@ module RWave
     end
 
     def get_callback_id
-      @callback_id_pool = (@callback_id_pool+1)%255
+      @callback_id_pool += 1
+      @callback_id_pool = 1 if @callback_id_pool > 255
+      @callback_id_pool
     end
 
     def messenging_complete!
