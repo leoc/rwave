@@ -66,7 +66,7 @@ module RWave
     end
 
     def send_ack
-      send_message Message.new(Message::ACK)
+      send_message Message.new([ Message::ACK ])
     end
   end
 end
