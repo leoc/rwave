@@ -1,11 +1,10 @@
 module RWave
   class Node
-    def initialize node_id, port
+    def initialize node_id, manager
       @node_id = node_id
-      @port = port
-      @callback_ids = []
+      @driver = driver
 
-      @port.on_message do |sent, received|
+      @driver.on_message do |sent, received|
         puts "call handler for 0x#{@node_id.to_s(16)}: #{received}"
         unless received.ack? or received.length <= 2
           case received.bytes[2]
@@ -17,18 +16,18 @@ module RWave
     end
 
     def get_callback_id
-      @port.get_callback_id
+      @driver.get_callback_id
     end
 
     def send_message bytes, options = {}
       message = Message.new bytes, options
       @callback_ids << options[:callback_id] if options[:callback_id]
-      @port.enqueue_message message
+      @driver.enqueue_message message
     end
 
     def messenging_complete! callback_id = nil
       @callback_ids.delete callback_id
-      @port.messenging_complete!
+      @driver.messenging_complete!
     end
 
     def on_response(sent, received)
