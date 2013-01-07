@@ -9,11 +9,6 @@ class KeyboardHandler < EM::Connection
   include EM::Protocols::LineText2
 
   def post_init
-    prompt
-  end
-
-  def prompt
-    print "> "
   end
 
   def receive_line line
@@ -44,7 +39,7 @@ class KeyboardHandler < EM::Connection
 end
 
 EM.run do
-  $rwave = RWave::Port.new('/dev/ttyUSB0')
+  $rwave = RWave::Manager.new('/dev/ttyUSB0')
   $nodes = {}
 
   EM.open_keyboard KeyboardHandler
